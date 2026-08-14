@@ -7,5 +7,12 @@ def test_pipeline_writes_auditable_outputs(tmp_path) -> None:
     assert (tmp_path / "reports" / "metrics.json").exists()
     assert (tmp_path / "reports" / "effect_estimates.csv").exists()
     assert (tmp_path / "reports" / "campaign_economics.csv").exists()
+    assert (tmp_path / "reports" / "economic_break_even.csv").exists()
     assert (tmp_path / "reports" / "decision_note.md").exists()
     assert (tmp_path / "reports" / "figures" / "effect_estimates.png").exists()
+    assert (tmp_path / "reports" / "figures" / "economic_break_even.png").exists()
+    assert metrics["economics"][0]["recommendation"] in {
+        "Scale",
+        "Redesign",
+        "Stop",
+    }

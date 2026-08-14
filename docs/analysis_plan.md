@@ -47,6 +47,34 @@ The economic decision uses total campaign cost for the treatment group, includin
 contact cost and incentive cost paid on all treatment-group orders. This captures
 subsidy leakage to customers who would have purchased without the campaign.
 
+## Versioned economic decision rule
+
+The implemented `economic-rule-v1` applies one mechanical decision after the required
+SRM check passes. Pre-treatment balance remains a diagnostic rather than a gate:
+
+| Output | Fixed condition |
+|---|---|
+| Scale | The 95% lower bounds for both the order effect and net incremental profit are positive |
+| Redesign | The order-effect lower bound is positive, but the net-profit interval includes zero |
+| Stop | The order-effect lower bound is not positive, or the net-profit upper bound is not positive |
+
+If experiment health checks fail, the output is Stop pending investigation. This rule
+was added after the repository's original synthetic demonstration already existed. It is
+fixed in code for this revision and future runs, but is not presented as preregistration
+of the original seed-42 result.
+
+The net-profit interval propagates the CUPED confidence interval for incremental
+contribution and treats observed contact and incentive costs as fixed. It therefore does
+not capture uncertainty in future unit costs, returns, or cost reconciliation.
+
+## Break-even scenarios
+
+The fixed contribution-margin multipliers are 0.80, 0.90, 1.00, 1.10, and 1.20.
+For each multiplier, the pipeline calculates the incentive cost per treated-group order
+that would make point net incremental profit equal zero. The same transformation is
+applied to the contribution-effect confidence bounds. These are deterministic stress
+scenarios, not estimated probabilities or forecasts.
+
 ## Estimation
 
 The unadjusted estimate is the treatment mean minus the control mean. CUPED subtracts

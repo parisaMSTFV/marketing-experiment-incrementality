@@ -33,6 +33,22 @@ happened without treatment. If the margin from incremental orders is smaller tha
 contact cost plus this subsidy leakage, the campaign destroys value despite
 increasing orders.
 
+## How is Scale, Redesign, or Stop selected?
+
+The versioned rule first requires experiment health checks to pass. Scale requires
+positive 95% lower bounds for both the order effect and net incremental profit.
+Redesign requires a positive order-effect lower bound while the profit interval still
+includes zero. Stop applies when the order-effect lower bound is not positive or even
+the optimistic profit bound is not positive. The rule was added after the original
+synthetic demonstration and is not described as preregistration of that first run.
+
+## What does the break-even curve show?
+
+It changes contribution margin mechanically from 0.8x to 1.2x and calculates the
+incentive cost per treated order that would make estimated net profit equal zero.
+The band propagates the contribution-effect confidence interval. It is a sensitivity
+analysis, not a forecast of future margins or costs.
+
 ## How should segment results be used?
 
 They guide the next pre-registered experiment. Four segment comparisons create

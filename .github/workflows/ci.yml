@@ -26,4 +26,4 @@ jobs:
       - name: Scan public files
         run: python scripts/check_sensitive.py
       - name: Smoke-test pipeline
-        run: python -m marketing_incrementality.cli run --customers 5000 --seed 7
+        run: make smoke

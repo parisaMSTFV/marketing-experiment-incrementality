@@ -8,6 +8,23 @@ a reproducible synthetic randomized experiment to answer two separate questions:
 
 All customer and campaign data in this repository is generated from scratch.
 
+## Executed economic decision
+
+**Redesign.** The CUPED order effect is positive, but the broad campaign's estimated
+net incremental profit is **-259**, with a 95% interval from **-13,226 to 12,709**
+synthetic currency units. Because the profit interval includes zero, the fixed
+`economic-rule-v1` does not support Scale.
+
+At the base contribution margin, the point break-even incentive cost is **1.98** per
+treated order versus the current cost of **2.00**. The contribution-effect interval
+maps to a break-even range of **1.09 to 2.87**. Observed campaign costs are treated as
+fixed; the margin scenarios are deterministic stress tests, not forecasts.
+
+[Decision note](reports/decision_note.md) ·
+[Break-even table](reports/economic_break_even.csv)
+
+![Economic break-even curve](reports/figures/economic_break_even.png)
+
 ## Business decision
 
 A customer offer is tested against a concurrent holdout. The analysis must decide
@@ -100,18 +117,25 @@ incentives are paid to customers who would have purchased without treatment.
 | Incremental contribution before campaign cost | 30,328 |
 | Campaign cost | 30,587 |
 | Net incremental profit | **-259** |
+| 95% net-profit interval | **-13,226 to 12,709** |
 | Incremental ROI | **-0.8%** |
 
 The order effect is statistically positive, but the portfolio profit point estimate
-is slightly negative and its confidence interval crosses zero. The decision is not
-to scale the broad offer yet: remove the low-response, high-subsidy audience and
-confirm the revised targeting rule in a new experiment.
+is slightly negative and its confidence interval crosses zero. The fixed decision is
+**Redesign**: remove the low-response, high-subsidy audience and confirm the revised
+targeting rule in a new experiment.
+
+The curve varies contribution margin from 0.8x to 1.2x and reports the incentive
+cost per treated order that would make point net profit equal zero. Its band carries
+the CUPED contribution-effect interval through the same calculation; it does not
+assign probabilities to the margin scenarios.
 
 ![Segment profitability](reports/figures/segment_profitability.png)
 
 The auditable results are in
 [campaign economics](reports/campaign_economics.csv) and the short
-[decision note](reports/decision_note.md).
+[decision note](reports/decision_note.md). The rule and its revision history are in
+the [analysis plan](docs/analysis_plan.md).
 
 ## Pre-specified segment analysis
 
