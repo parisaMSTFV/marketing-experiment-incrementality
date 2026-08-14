@@ -42,6 +42,12 @@ def main() -> None:
             "Net incremental profit: "
             f"{portfolio['net_incremental_profit']:,.2f}"
         )
+        print(
+            "95% net-profit interval: "
+            f"[{portfolio['net_profit_ci_lower']:,.2f}, "
+            f"{portfolio['net_profit_ci_upper']:,.2f}]"
+        )
+        print(f"Economic decision: {portfolio['recommendation']}")
 
 
 if __name__ == "__main__":

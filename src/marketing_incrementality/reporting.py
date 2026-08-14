@@ -158,6 +158,49 @@ def plot_segment_profitability(economics: pd.DataFrame, path: Path) -> None:
     _save(fig, path)
 
 
+def plot_economic_break_even(curve: pd.DataFrame, path: Path) -> None:
+    """Plot break-even incentive cost across contribution-margin scenarios."""
+
+    x = curve["contribution_margin_multiplier"].to_numpy(dtype=float)
+    point = curve["break_even_incentive_cost_per_treated_order"].to_numpy(
+        dtype=float
+    )
+    lower = curve["break_even_incentive_cost_ci_lower"].to_numpy(dtype=float)
+    upper = curve["break_even_incentive_cost_ci_upper"].to_numpy(dtype=float)
+    current_cost = float(
+        curve["current_incentive_cost_per_treated_order"].iloc[0]
+    )
+
+    fig, ax = plt.subplots(figsize=(7.2, 4.8))
+    ax.fill_between(
+        x,
+        lower,
+        upper,
+        color=COLORS["blue"],
+        alpha=0.18,
+        label="95% contribution-effect interval",
+    )
+    ax.plot(
+        x,
+        point,
+        color=COLORS["navy"],
+        marker="o",
+        label="Point break-even cost",
+    )
+    ax.axhline(
+        current_cost,
+        color=COLORS["orange"],
+        linestyle="--",
+        label=f"Current incentive cost ({current_cost:.2f})",
+    )
+    ax.set_xlabel("Contribution-margin multiplier")
+    ax.set_ylabel("Break-even incentive cost per treated order")
+    ax.set_title("Campaign economics are sensitive to margin and subsidy cost")
+    ax.legend(frameon=False)
+    ax.spines[["top", "right"]].set_visible(False)
+    _save(fig, path)
+
+
 def plot_power_curve(power_curve: pd.DataFrame, path: Path) -> None:
     fig, ax = plt.subplots(figsize=(7.2, 4.8))
     for method, color in [("Unadjusted", COLORS["blue"]), ("CUPED", COLORS["orange"])]:

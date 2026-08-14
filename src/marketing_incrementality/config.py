@@ -21,6 +21,14 @@ class EconomicsConfig:
 
     contact_cost_per_treated_customer: float = 0.05
     incentive_cost_per_treated_order: float = 2.00
+    margin_scenario_multipliers: tuple[float, ...] = (
+        0.80,
+        0.90,
+        1.00,
+        1.10,
+        1.20,
+    )
+    decision_rule_version: str = "economic-rule-v1"
 
 
 @dataclass(frozen=True)

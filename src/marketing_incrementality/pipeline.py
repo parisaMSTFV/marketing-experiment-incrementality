@@ -12,7 +12,10 @@ from marketing_incrementality.config import (
     SimulationConfig,
 )
 from marketing_incrementality.diagnostics import balance_table, sample_ratio_check
-from marketing_incrementality.economics import evaluate_campaign_economics
+from marketing_incrementality.economics import (
+    build_break_even_curve,
+    evaluate_campaign_economics,
+)
 from marketing_incrementality.estimation import (
     cuped_estimate,
     difference_in_means,
@@ -21,6 +24,7 @@ from marketing_incrementality.estimation import (
 from marketing_incrementality.power import build_power_curve
 from marketing_incrementality.reporting import (
     plot_before_after_vs_experiment,
+    plot_economic_break_even,
     plot_effect_estimates,
     plot_power_curve,
     plot_precision_comparison,
@@ -50,11 +54,15 @@ def _write_run_summary(
     metrics: dict[str, object],
     segment_effects: pd.DataFrame,
     economics: pd.DataFrame,
+    break_even_curve: pd.DataFrame,
 ) -> None:
     health = metrics["experiment_health"]
     primary = metrics["primary_effect"]
     cuped = metrics["cuped_effect"]
     portfolio = economics.set_index("audience").loc["All customers"]
+    base_break_even = break_even_curve.loc[
+        break_even_curve["contribution_margin_multiplier"] == 1.0
+    ].iloc[0]
     profitable_segments = economics.loc[
         (economics["audience"] != "All customers")
         & (economics["net_incremental_profit"] > 0),
@@ -92,8 +100,16 @@ This report was generated from a fully synthetic randomized experiment with seed
   {portfolio["incremental_contribution_before_campaign_cost"]:,.0f}
 - Campaign cost: {portfolio["campaign_cost"]:,.0f}
 - Net incremental profit: {portfolio["net_incremental_profit"]:,.0f}
+- 95% net-profit interval: [{portfolio["net_profit_ci_lower"]:,.0f},
+  {portfolio["net_profit_ci_upper"]:,.0f}]
 - Incremental ROI: {portfolio["incremental_roi"]:.1%}
 - Portfolio recommendation: **{portfolio["recommendation"]}**
+- Point break-even incentive cost at the base margin: \
+{base_break_even["break_even_incentive_cost_per_treated_order"]:.2f} per treated order
+
+The profit interval propagates uncertainty in the CUPED contribution effect while
+treating observed campaign costs as fixed. The break-even scenario changes contribution
+margin mechanically; it is not a probability model for future margins.
 
 Profitable segment estimates: {", ".join(profitable_segments) or "none"}.
 Segments significant after Holm adjustment: {", ".join(significant_segments) or "none"}.
@@ -108,9 +124,13 @@ def _write_decision_note(
     path: Path,
     metrics: dict[str, object],
     economics: pd.DataFrame,
+    break_even_curve: pd.DataFrame,
 ) -> None:
     primary = metrics["cuped_effect"]
     portfolio = economics.set_index("audience").loc["All customers"]
+    base_break_even = break_even_curve.loc[
+        break_even_curve["contribution_margin_multiplier"] == 1.0
+    ].iloc[0]
     segment_rows = economics.loc[economics["audience"] != "All customers"].copy()
     scale_candidates = segment_rows.loc[
         segment_rows["net_incremental_profit"] > 0, "audience"
@@ -130,9 +150,36 @@ orders per treated customer, with a 95% confidence interval from
 behavior in the synthetic experiment.
 
 At the current contact and incentive costs, estimated net incremental profit is
-{portfolio["net_incremental_profit"]:,.0f}. The main issue is subsidy leakage:
-the incentive is paid on treatment-group orders that would have happened without
-the campaign as well.
+{portfolio["net_incremental_profit"]:,.0f}, with a 95% interval from
+{portfolio["net_profit_ci_lower"]:,.0f} to {portfolio["net_profit_ci_upper"]:,.0f}.
+The interval includes zero, so the fixed rule does not support scale. The main issue is
+subsidy leakage: the incentive is paid on treatment-group orders that would have happened
+without the campaign as well.
+
+## Fixed economic decision rule
+
+The versioned `{portfolio["decision_rule_version"]}` rule produces exactly one output:
+
+| Output | Condition after experiment health checks pass |
+|---|---|
+| Scale | Order-effect lower bound > 0 and net-profit lower bound > 0 |
+| Redesign | Order-effect lower bound > 0 and the net-profit interval includes zero |
+| Stop | Order-effect lower bound <= 0 or net-profit upper bound <= 0 |
+
+Current rule reason: {portfolio["decision_reason"]}
+
+## Break-even evidence
+
+At the base contribution margin, the point break-even incentive cost is
+{base_break_even["break_even_incentive_cost_per_treated_order"]:.2f} per treated order,
+compared with the current cost of
+{base_break_even["current_incentive_cost_per_treated_order"]:.2f}. The 95% contribution-
+effect interval maps to a break-even range from
+{base_break_even["break_even_incentive_cost_ci_lower"]:.2f} to
+{base_break_even["break_even_incentive_cost_ci_upper"]:.2f}.
+
+Observed contact and incentive costs are treated as fixed in the interval. The margin
+multipliers in `economic_break_even.csv` are deterministic stress scenarios, not forecasts.
 
 ## Recommended next test
 
@@ -219,8 +266,15 @@ def run_pipeline(
         experiment,
         economics_config,
         analysis_config.alpha,
+        experiment_health_passed=bool(srm["passed"]),
     )
     economics.to_csv(reports_dir / "campaign_economics.csv", index=False)
+    break_even_curve = build_break_even_curve(
+        experiment,
+        economics,
+        economics_config,
+    )
+    break_even_curve.to_csv(reports_dir / "economic_break_even.csv", index=False)
     power_curve = build_power_curve(
         experiment,
         alpha=analysis_config.alpha,
@@ -238,6 +292,10 @@ def run_pipeline(
     plot_segment_profitability(
         economics,
         figures_dir / "segment_profitability.png",
+    )
+    plot_economic_break_even(
+        break_even_curve,
+        figures_dir / "economic_break_even.png",
     )
     plot_power_curve(power_curve, figures_dir / "power_curve.png")
 
@@ -269,6 +327,7 @@ def run_pipeline(
         "simulation_truth": truth,
         "segment_effects": _records(segment_effects),
         "economics": _records(economics),
+        "economic_break_even": _records(break_even_curve),
     }
     (reports_dir / "metrics.json").write_text(
         json.dumps(metrics, indent=2, allow_nan=False),
@@ -279,10 +338,12 @@ def run_pipeline(
         metrics,
         segment_effects,
         economics,
+        break_even_curve,
     )
     _write_decision_note(
         reports_dir / "decision_note.md",
         metrics,
         economics,
+        break_even_curve,
     )
     return metrics
