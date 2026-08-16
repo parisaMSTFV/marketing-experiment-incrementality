@@ -17,8 +17,8 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument(
         "--project-root",
         type=Path,
-        default=Path.cwd(),
-        help="Directory where data and reports are written.",
+        default=Path("local-runs/latest"),
+        help="Output root; defaults to an ignored local-run directory.",
     )
     return parser
 

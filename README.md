@@ -177,8 +177,9 @@ python -m pytest
 python scripts/check_sensitive.py
 ```
 
-The customer-level synthetic dataset is written to an ignored directory. Only
-compact aggregate outputs are committed.
+The run writes its data and reports under the ignored `local-runs/latest` directory,
+so the committed evidence remains unchanged. Only compact aggregate outputs are
+committed.
 
 ## Limitations
 
