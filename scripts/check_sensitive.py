@@ -4,7 +4,7 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SKIP_PARTS = {".git", ".venv", "data", "__pycache__"}
+SKIP_PARTS = {".git", ".venv", "data", "__pycache__", "local-runs"}
 TEXT_SUFFIXES = {
     ".py",
     ".md",
