@@ -11,7 +11,7 @@ behavior in the synthetic experiment.
 
 At the current contact and incentive costs, estimated net incremental profit is
 -259, with a 95% interval from
--13,226 to 12,709.
+-12,879 to 12,362.
 The interval includes zero, so the fixed rule does not support scale. The main issue is
 subsidy leakage: the incentive is paid on treatment-group orders that would have happened
 without the campaign as well.
@@ -38,8 +38,10 @@ effect interval maps to a break-even range from
 1.09 to
 2.87.
 
-Observed contact and incentive costs are treated as fixed in the interval. The margin
-multipliers in `economic_break_even.csv` are deterministic stress scenarios, not forecasts.
+The profit interval is estimated from customer-level net value, so realized order-linked
+incentive variation is included. Future unit-cost and margin uncertainty is not. The
+margin multipliers in `economic_break_even.csv` are deterministic stress scenarios, not
+forecasts.
 
 ## Recommended next test
 
@@ -48,6 +50,9 @@ multipliers in `economic_break_even.csv` are deterministic stress scenarios, not
 - Keep the randomized holdout and the same primary metric.
 - Pre-register any new targeting rule before reading the next experiment outcome.
 - Treat segment findings as decision inputs, not proof of permanent causal differences.
+
+The separate `seed_stability.csv` artifact shows whether the portfolio decision and
+segment point estimates persist across repeated synthetic samples.
 
 All values in this note come from synthetic data and exist only to demonstrate the
 decision workflow.

@@ -14,8 +14,19 @@ def difference_in_means(
 ) -> dict[str, float | int | str]:
     """Estimate an intent-to-treat difference with an unpooled standard error."""
 
+    if not 0 < alpha < 1:
+        raise ValueError("alpha must be between zero and one")
+    if outcome not in frame or "treatment" not in frame:
+        raise ValueError("frame must contain treatment and the requested outcome")
+    if frame[["treatment", outcome]].isna().any().any():
+        raise ValueError("treatment and outcome values must be complete")
+    if not set(frame["treatment"].unique()).issubset({0, 1}):
+        raise ValueError("treatment must contain only zero and one")
+
     treatment = frame.loc[frame["treatment"] == 1, outcome].astype(float)
     control = frame.loc[frame["treatment"] == 0, outcome].astype(float)
+    if len(treatment) < 2 or len(control) < 2:
+        raise ValueError("both treatment groups must contain at least two rows")
     effect = float(treatment.mean() - control.mean())
     standard_error = float(
         np.sqrt(
@@ -51,6 +62,11 @@ def cuped_estimate(
     alpha: float = 0.05,
 ) -> dict[str, float | int | str]:
     """Apply CUPED using a pre-treatment covariate and a control-fitted theta."""
+
+    if covariate not in frame:
+        raise ValueError("frame must contain the requested CUPED covariate")
+    if frame[covariate].isna().any():
+        raise ValueError("the CUPED covariate must be complete")
 
     adjusted = frame.copy()
     control = adjusted.loc[adjusted["treatment"] == 0, [outcome, covariate]].astype(

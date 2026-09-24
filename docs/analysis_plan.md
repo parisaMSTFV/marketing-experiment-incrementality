@@ -63,9 +63,12 @@ was added after the repository's original synthetic demonstration already existe
 fixed in code for this revision and future runs, but is not presented as preregistration
 of the original seed-42 result.
 
-The net-profit interval propagates the CUPED confidence interval for incremental
-contribution and treats observed contact and incentive costs as fixed. It therefore does
-not capture uncertainty in future unit costs, returns, or cost reconciliation.
+The net-profit interval applies CUPED to customer-level net value. Treatment rows subtract
+contact cost and the incentive cost attached to their realized orders; control rows carry
+no campaign cost. This includes sampling variation in realized order-linked costs while
+preserving exact reconciliation between the point estimate, incremental contribution, and
+observed campaign cost. It does not capture uncertainty in future unit costs, returns,
+margin assumptions, or later cost reconciliation.
 
 ## Break-even scenarios
 

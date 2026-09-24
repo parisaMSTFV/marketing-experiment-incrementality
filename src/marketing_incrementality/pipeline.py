@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import math
+import tempfile
 from pathlib import Path
 
 import pandas as pd
@@ -107,9 +108,11 @@ This report was generated from a fully synthetic randomized experiment with seed
 - Point break-even incentive cost at the base margin: \
 {base_break_even["break_even_incentive_cost_per_treated_order"]:.2f} per treated order
 
-The profit interval propagates uncertainty in the CUPED contribution effect while
-treating observed campaign costs as fixed. The break-even scenario changes contribution
-margin mechanically; it is not a probability model for future margins.
+The profit interval applies CUPED to customer-level net value after realized contact
+and order-linked incentive costs. It captures sampling variation in those realized
+costs, but not uncertainty in future unit costs or margin assumptions. The break-even
+scenario changes contribution margin mechanically; it is not a probability model for
+future margins.
 
 Profitable segment estimates: {", ".join(profitable_segments) or "none"}.
 Segments significant after Holm adjustment: {", ".join(significant_segments) or "none"}.
@@ -178,8 +181,10 @@ effect interval maps to a break-even range from
 {base_break_even["break_even_incentive_cost_ci_lower"]:.2f} to
 {base_break_even["break_even_incentive_cost_ci_upper"]:.2f}.
 
-Observed contact and incentive costs are treated as fixed in the interval. The margin
-multipliers in `economic_break_even.csv` are deterministic stress scenarios, not forecasts.
+The profit interval is estimated from customer-level net value, so realized order-linked
+incentive variation is included. Future unit-cost and margin uncertainty is not. The
+margin multipliers in `economic_break_even.csv` are deterministic stress scenarios, not
+forecasts.
 
 ## Recommended next test
 
@@ -188,6 +193,9 @@ multipliers in `economic_break_even.csv` are deterministic stress scenarios, not
 - Keep the randomized holdout and the same primary metric.
 - Pre-register any new targeting rule before reading the next experiment outcome.
 - Treat segment findings as decision inputs, not proof of permanent causal differences.
+
+The separate `seed_stability.csv` artifact shows whether the portfolio decision and
+segment point estimates persist across repeated synthetic samples.
 
 All values in this note come from synthetic data and exist only to demonstrate the
 decision workflow.
@@ -216,7 +224,7 @@ def run_pipeline(
     experiment.to_csv(
         data_dir / "synthetic_experiment.csv.gz",
         index=False,
-        compression="gzip",
+        compression={"method": "gzip", "mtime": 0},
     )
 
     srm = sample_ratio_check(
@@ -347,3 +355,40 @@ def run_pipeline(
         break_even_curve,
     )
     return metrics
+
+
+def run_seed_stability(
+    n_customers: int = 60_000,
+    seeds: tuple[int, ...] = (1, 7, 21, 42, 84),
+) -> pd.DataFrame:
+    """Repeat the full decision workflow and summarize sensitivity to simulation seed."""
+
+    if not seeds:
+        raise ValueError("at least one seed is required")
+    rows: list[dict[str, object]] = []
+    for seed in seeds:
+        with tempfile.TemporaryDirectory(prefix=f"incrementality-seed-{seed}-") as run_dir:
+            metrics = run_pipeline(Path(run_dir), n_customers=n_customers, seed=seed)
+        effect = metrics["cuped_effect"]
+        portfolio = metrics["economics"][0]
+        positive_segments = sorted(
+            row["audience"]
+            for row in metrics["economics"]
+            if row["audience"] != "All customers"
+            and float(row["net_incremental_profit"]) > 0
+        )
+        rows.append(
+            {
+                "seed": seed,
+                "customers": n_customers,
+                "cuped_order_effect": effect["absolute_effect"],
+                "order_ci_lower": effect["ci_lower"],
+                "order_ci_upper": effect["ci_upper"],
+                "net_incremental_profit": portfolio["net_incremental_profit"],
+                "net_profit_ci_lower": portfolio["net_profit_ci_lower"],
+                "net_profit_ci_upper": portfolio["net_profit_ci_upper"],
+                "decision": portfolio["recommendation"],
+                "positive_point_estimate_segments": "|".join(positive_segments),
+            }
+        )
+    return pd.DataFrame(rows)

@@ -1,4 +1,4 @@
-from marketing_incrementality.pipeline import run_pipeline
+from marketing_incrementality.pipeline import run_pipeline, run_seed_stability
 
 
 def test_pipeline_writes_auditable_outputs(tmp_path) -> None:
@@ -16,3 +16,10 @@ def test_pipeline_writes_auditable_outputs(tmp_path) -> None:
         "Redesign",
         "Stop",
     }
+
+
+def test_seed_stability_returns_one_auditable_row_per_seed() -> None:
+    stability = run_seed_stability(n_customers=500, seeds=(3,))
+    assert stability["seed"].tolist() == [3]
+    assert stability["customers"].tolist() == [500]
+    assert stability.loc[0, "decision"] in {"Scale", "Redesign", "Stop"}

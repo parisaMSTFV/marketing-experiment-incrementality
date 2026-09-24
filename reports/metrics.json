@@ -169,10 +169,10 @@
       "campaign_cost": 30586.9,
       "contact_cost": 1492.9,
       "incentive_cost": 29094.0,
-      "net_incremental_profit": -258.5699161850316,
-      "net_profit_ci_lower": -13226.354341007274,
-      "net_profit_ci_upper": 12709.214508637211,
-      "incremental_roi": -0.008453616292760351,
+      "net_incremental_profit": -258.56991618491725,
+      "net_profit_ci_lower": -12878.690256745986,
+      "net_profit_ci_upper": 12361.550424376152,
+      "incremental_roi": -0.008453616292756613,
       "cost_per_incremental_order": 32.03570116599347,
       "break_even_incremental_orders": 1054.2690150490414,
       "break_even_order_effect_per_treated_customer": 0.03530943181221252,
@@ -180,7 +180,7 @@
       "recommendation": "Redesign",
       "decision_reason": "The order effect is positive, but the profit interval includes zero.",
       "decision_rule_version": "economic-rule-v1",
-      "net_profit_uncertainty_method": "CUPED contribution CI with observed costs fixed"
+      "net_profit_uncertainty_method": "CUPED customer-level net value including realized order-linked costs"
     },
     {
       "audience": "At Risk",
@@ -196,10 +196,10 @@
       "campaign_cost": 2265.65,
       "contact_cost": 225.65,
       "incentive_cost": 2040.0,
-      "net_incremental_profit": 3317.1643408765117,
-      "net_profit_ci_lower": 594.4819840255454,
-      "net_profit_ci_upper": 6039.846697727478,
-      "incremental_roi": 1.464111553362837,
+      "net_incremental_profit": 3317.1643408765194,
+      "net_profit_ci_lower": 678.1901916411451,
+      "net_profit_ci_upper": 5956.138490111894,
+      "incremental_roi": 1.4641115533628404,
       "cost_per_incremental_order": 11.609727950923896,
       "break_even_incremental_orders": 84.66664335884536,
       "break_even_order_effect_per_treated_customer": 0.018760612310845415,
@@ -207,7 +207,7 @@
       "recommendation": "Scale",
       "decision_reason": "The order effect and net-profit lower bounds are positive.",
       "decision_rule_version": "economic-rule-v1",
-      "net_profit_uncertainty_method": "CUPED contribution CI with observed costs fixed"
+      "net_profit_uncertainty_method": "CUPED customer-level net value including realized order-linked costs"
     },
     {
       "audience": "Growing",
@@ -223,10 +223,10 @@
       "campaign_cost": 8059.9,
       "contact_cost": 441.90000000000003,
       "incentive_cost": 7618.0,
-      "net_incremental_profit": 3998.982544265058,
-      "net_profit_ci_lower": -1217.248317063969,
-      "net_profit_ci_upper": 9215.213405594086,
-      "incremental_roi": 0.49615783623432774,
+      "net_incremental_profit": 3998.9825442650626,
+      "net_profit_ci_lower": -1054.4417349551086,
+      "net_profit_ci_upper": 9052.406823485235,
+      "incremental_roi": 0.4961578362343283,
       "cost_per_incremental_order": 17.04616129396861,
       "break_even_incremental_orders": 312.9784749380578,
       "break_even_order_effect_per_treated_customer": 0.035412816806750146,
@@ -234,7 +234,7 @@
       "recommendation": "Redesign",
       "decision_reason": "The order effect is positive, but the profit interval includes zero.",
       "decision_rule_version": "economic-rule-v1",
-      "net_profit_uncertainty_method": "CUPED contribution CI with observed costs fixed"
+      "net_profit_uncertainty_method": "CUPED customer-level net value including realized order-linked costs"
     },
     {
       "audience": "Loyal",
@@ -250,10 +250,10 @@
       "campaign_cost": 17874.45,
       "contact_cost": 450.45000000000005,
       "incentive_cost": 17424.0,
-      "net_incremental_profit": -7535.081106853824,
-      "net_profit_ci_lower": -18192.823946099506,
-      "net_profit_ci_upper": 3122.661732391858,
-      "incremental_roi": -0.42155596993775046,
+      "net_incremental_profit": -7535.0811068538005,
+      "net_profit_ci_lower": -17929.339913953023,
+      "net_profit_ci_upper": 2859.177700245421,
+      "incremental_roi": -0.42155596993774913,
       "cost_per_incremental_order": 88.83856012711287,
       "break_even_incremental_orders": 572.636000993274,
       "break_even_order_effect_per_treated_customer": 0.0635626596729131,
@@ -261,7 +261,7 @@
       "recommendation": "Stop",
       "decision_reason": "The order-effect interval does not exclude zero.",
       "decision_rule_version": "economic-rule-v1",
-      "net_profit_uncertainty_method": "CUPED contribution CI with observed costs fixed"
+      "net_profit_uncertainty_method": "CUPED customer-level net value including realized order-linked costs"
     },
     {
       "audience": "New",
@@ -277,10 +277,10 @@
       "campaign_cost": 2386.9,
       "contact_cost": 374.90000000000003,
       "incentive_cost": 2012.0,
-      "net_incremental_profit": 1210.3963269254768,
-      "net_profit_ci_lower": -988.0069798987313,
-      "net_profit_ci_upper": 3408.7996337496847,
-      "incremental_roi": 0.5070997222026381,
+      "net_incremental_profit": 1210.39632692547,
+      "net_profit_ci_lower": -907.4579026944859,
+      "net_profit_ci_upper": 3328.2505565454258,
+      "incremental_roi": 0.5070997222026352,
       "cost_per_incremental_order": 15.972700879711303,
       "break_even_incremental_orders": 109.13897904043232,
       "break_even_order_effect_per_treated_customer": 0.01455574540416542,
@@ -288,7 +288,7 @@
       "recommendation": "Redesign",
       "decision_reason": "The order effect is positive, but the profit interval includes zero.",
       "decision_rule_version": "economic-rule-v1",
-      "net_profit_uncertainty_method": "CUPED contribution CI with observed costs fixed"
+      "net_profit_uncertainty_method": "CUPED customer-level net value including realized order-linked costs"
     }
   ],
   "economic_break_even": [
@@ -298,9 +298,9 @@
       "break_even_incentive_cost_ci_lower": 0.8521026003433136,
       "break_even_incentive_cost_ci_upper": 2.2784073421949382,
       "current_incentive_cost_per_treated_order": 2.0,
-      "net_profit_at_current_cost": -6324.235932948024,
-      "net_profit_ci_lower_at_current_cost": -16698.46347280582,
-      "net_profit_ci_upper_at_current_cost": 4049.991606909767,
+      "net_profit_at_current_cost": -6324.235932947922,
+      "net_profit_ci_lower_at_current_cost": -16353.135005063115,
+      "net_profit_ci_upper_at_current_cost": 3704.663139167269,
       "decision_at_current_cost": "Redesign"
     },
     {
@@ -309,9 +309,9 @@
       "break_even_incentive_cost_ci_lower": 0.9714436717600505,
       "break_even_incentive_cost_ci_upper": 2.5760365063431285,
       "current_incentive_cost_per_treated_order": 2.0,
-      "net_profit_at_current_cost": -3291.4029245665297,
-      "net_profit_ci_lower_at_current_cost": -14962.408906906547,
-      "net_profit_ci_upper_at_current_cost": 8379.603057773493,
+      "net_profit_at_current_cost": -3291.402924566473,
+      "net_profit_ci_lower_at_current_cost": -14615.778963694256,
+      "net_profit_ci_upper_at_current_cost": 8032.9731145613105,
       "decision_at_current_cost": "Redesign"
     },
     {
@@ -320,9 +320,9 @@
       "break_even_incentive_cost_ci_lower": 1.0907847431767874,
       "break_even_incentive_cost_ci_upper": 2.8736656704913184,
       "current_incentive_cost_per_treated_order": 2.0,
-      "net_profit_at_current_cost": -258.5699161850316,
-      "net_profit_ci_lower_at_current_cost": -13226.354341007274,
-      "net_profit_ci_upper_at_current_cost": 12709.214508637211,
+      "net_profit_at_current_cost": -258.56991618491725,
+      "net_profit_ci_lower_at_current_cost": -12878.690256745986,
+      "net_profit_ci_upper_at_current_cost": 12361.550424376152,
       "decision_at_current_cost": "Redesign"
     },
     {
@@ -331,9 +331,9 @@
       "break_even_incentive_cost_ci_lower": 1.2101258145935245,
       "break_even_incentive_cost_ci_upper": 3.171294834639509,
       "current_incentive_cost_per_treated_order": 2.0,
-      "net_profit_at_current_cost": 2774.2630921964665,
-      "net_profit_ci_lower_at_current_cost": -11490.299775108,
-      "net_profit_ci_upper_at_current_cost": 17038.825959500937,
+      "net_profit_at_current_cost": 2774.263092196479,
+      "net_profit_ci_lower_at_current_cost": -11141.794208730687,
+      "net_profit_ci_upper_at_current_cost": 16690.320393123646,
       "decision_at_current_cost": "Redesign"
     },
     {
@@ -342,9 +342,9 @@
       "break_even_incentive_cost_ci_lower": 1.3294668860102612,
       "break_even_incentive_cost_ci_upper": 3.468923998787699,
       "current_incentive_cost_per_treated_order": 2.0,
-      "net_profit_at_current_cost": 5807.096100577961,
-      "net_profit_ci_lower_at_current_cost": -9754.24520920873,
-      "net_profit_ci_upper_at_current_cost": 21368.437410364655,
+      "net_profit_at_current_cost": 5807.096100578035,
+      "net_profit_ci_lower_at_current_cost": -9405.041581316198,
+      "net_profit_ci_upper_at_current_cost": 21019.233782472267,
       "decision_at_current_cost": "Redesign"
     }
   ]

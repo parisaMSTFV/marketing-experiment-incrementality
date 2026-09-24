@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 
 from marketing_incrementality.diagnostics import balance_table, sample_ratio_check
 
@@ -21,3 +22,8 @@ def test_balance_table_flags_material_difference() -> None:
     result = balance_table(frame, ["pre_orders"])
     pre_orders = result.set_index("covariate").loc["pre_orders"]
     assert not bool(pre_orders["passed"])
+
+
+def test_sample_ratio_check_rejects_invalid_assignments() -> None:
+    with pytest.raises(ValueError, match="only zero and one"):
+        sample_ratio_check(pd.DataFrame({"treatment": [0, 2, 1]}))
