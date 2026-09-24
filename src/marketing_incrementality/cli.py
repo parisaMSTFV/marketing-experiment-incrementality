@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from marketing_incrementality.pipeline import run_pipeline
+from marketing_incrementality.pipeline import run_pipeline, run_seed_stability
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -19,6 +19,22 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         default=Path("local-runs/latest"),
         help="Output root; defaults to an ignored local-run directory.",
+    )
+    stability = subparsers.add_parser(
+        "stability",
+        help="Repeat the full workflow across pre-defined simulation seeds.",
+    )
+    stability.add_argument("--customers", type=int, default=60_000)
+    stability.add_argument(
+        "--seeds",
+        type=int,
+        nargs="+",
+        default=[1, 7, 21, 42, 84],
+    )
+    stability.add_argument(
+        "--output",
+        type=Path,
+        default=Path("local-runs/seed-stability.csv"),
     )
     return parser
 
@@ -48,6 +64,19 @@ def main() -> None:
             f"{portfolio['net_profit_ci_upper']:,.2f}]"
         )
         print(f"Economic decision: {portfolio['recommendation']}")
+    elif args.command == "stability":
+        results = run_seed_stability(
+            n_customers=args.customers,
+            seeds=tuple(args.seeds),
+        )
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        results.to_csv(args.output, index=False)
+        counts = results["decision"].value_counts().sort_index()
+        print(
+            "Decision counts: "
+            + ", ".join(f"{decision}={count}" for decision, count in counts.items())
+        )
+        print(f"Wrote seed stability table to {args.output}")
 
 
 if __name__ == "__main__":

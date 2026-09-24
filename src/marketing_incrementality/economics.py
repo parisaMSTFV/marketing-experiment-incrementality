@@ -55,6 +55,22 @@ def _economics_for_slice(
     )
     campaign_cost = float(contact_cost + incentive_cost)
 
+    net_value_frame = frame.copy()
+    net_value_frame["post_net_value"] = net_value_frame["post_contribution"] - (
+        net_value_frame["treatment"]
+        * (
+            config.contact_cost_per_treated_customer
+            + config.incentive_cost_per_treated_order
+            * net_value_frame["post_orders"]
+        )
+    )
+    net_value = cuped_estimate(
+        net_value_frame,
+        "post_net_value",
+        "pre_contribution",
+        alpha,
+    )
+
     incremental_orders = float(orders["absolute_effect"]) * n_treatment
     incremental_revenue = float(revenue["absolute_effect"]) * n_treatment
     incremental_contribution = (
@@ -62,9 +78,9 @@ def _economics_for_slice(
     )
     contribution_ci_lower = float(contribution["ci_lower"]) * n_treatment
     contribution_ci_upper = float(contribution["ci_upper"]) * n_treatment
-    net_incremental_profit = incremental_contribution - campaign_cost
-    net_profit_ci_lower = contribution_ci_lower - campaign_cost
-    net_profit_ci_upper = contribution_ci_upper - campaign_cost
+    net_incremental_profit = float(net_value["absolute_effect"]) * n_treatment
+    net_profit_ci_lower = float(net_value["ci_lower"]) * n_treatment
+    net_profit_ci_upper = float(net_value["ci_upper"]) * n_treatment
     incremental_roi = (
         net_incremental_profit / campaign_cost if campaign_cost > 0 else math.nan
     )
@@ -119,7 +135,9 @@ def _economics_for_slice(
         "recommendation": recommendation,
         "decision_reason": decision_reason,
         "decision_rule_version": config.decision_rule_version,
-        "net_profit_uncertainty_method": "CUPED contribution CI with observed costs fixed",
+        "net_profit_uncertainty_method": (
+            "CUPED customer-level net value including realized order-linked costs"
+        ),
     }
 
 
@@ -130,6 +148,15 @@ def evaluate_campaign_economics(
     experiment_health_passed: bool = True,
 ) -> pd.DataFrame:
     """Reconcile incrementality, campaign spend, and net profit."""
+
+    if config.contact_cost_per_treated_customer < 0:
+        raise ValueError("contact cost must be non-negative")
+    if config.incentive_cost_per_treated_order < 0:
+        raise ValueError("incentive cost must be non-negative")
+    if not config.margin_scenario_multipliers or any(
+        multiplier <= 0 for multiplier in config.margin_scenario_multipliers
+    ):
+        raise ValueError("margin scenario multipliers must be positive")
 
     rows = [
         _economics_for_slice(
@@ -181,12 +208,27 @@ def build_break_even_curve(
         contribution_upper = (
             float(portfolio["incremental_contribution_ci_upper"]) * multiplier
         )
-        current_campaign_cost = contact_cost + (
-            treated_orders * current_incentive_cost
+        scenario_frame = frame.copy()
+        scenario_frame["post_net_value"] = (
+            scenario_frame["post_contribution"] * multiplier
+            - scenario_frame["treatment"]
+            * (
+                config.contact_cost_per_treated_customer
+                + current_incentive_cost * scenario_frame["post_orders"]
+            )
         )
-        net_profit = contribution - current_campaign_cost
-        net_profit_lower = contribution_lower - current_campaign_cost
-        net_profit_upper = contribution_upper - current_campaign_cost
+        scenario_frame["pre_net_value"] = (
+            scenario_frame["pre_contribution"] * multiplier
+        )
+        net_value = cuped_estimate(
+            scenario_frame,
+            "post_net_value",
+            "pre_net_value",
+        )
+        n_treatment = int((scenario_frame["treatment"] == 1).sum())
+        net_profit = float(net_value["absolute_effect"]) * n_treatment
+        net_profit_lower = float(net_value["ci_lower"]) * n_treatment
+        net_profit_upper = float(net_value["ci_upper"]) * n_treatment
         decision, _ = economic_decision(
             float(portfolio["incremental_order_ci_lower"]),
             net_profit_lower,

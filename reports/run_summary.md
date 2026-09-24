@@ -27,15 +27,17 @@ This report was generated from a fully synthetic randomized experiment with seed
   30,328
 - Campaign cost: 30,587
 - Net incremental profit: -259
-- 95% net-profit interval: [-13,226,
-  12,709]
+- 95% net-profit interval: [-12,879,
+  12,362]
 - Incremental ROI: -0.8%
 - Portfolio recommendation: **Redesign**
 - Point break-even incentive cost at the base margin: 1.98 per treated order
 
-The profit interval propagates uncertainty in the CUPED contribution effect while
-treating observed campaign costs as fixed. The break-even scenario changes contribution
-margin mechanically; it is not a probability model for future margins.
+The profit interval applies CUPED to customer-level net value after realized contact
+and order-linked incentive costs. It captures sampling variation in those realized
+costs, but not uncertainty in future unit costs or margin assumptions. The break-even
+scenario changes contribution margin mechanically; it is not a probability model for
+future margins.
 
 Profitable segment estimates: At Risk, Growing, New.
 Segments significant after Holm adjustment: At Risk, Growing, New.

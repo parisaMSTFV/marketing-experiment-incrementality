@@ -11,14 +11,15 @@ All customer and campaign data in this repository is generated from scratch.
 ## Executed economic decision
 
 **Redesign.** The CUPED order effect is positive, but the broad campaign's estimated
-net incremental profit is **-259**, with a 95% interval from **-13,226 to 12,709**
+net incremental profit is **-259**, with a 95% interval from **-12,879 to 12,362**
 synthetic currency units. Because the profit interval includes zero, the fixed
 `economic-rule-v1` does not support Scale.
 
 At the base contribution margin, the point break-even incentive cost is **1.98** per
 treated order versus the current cost of **2.00**. The contribution-effect interval
-maps to a break-even range of **1.09 to 2.87**. Observed campaign costs are treated as
-fixed; the margin scenarios are deterministic stress tests, not forecasts.
+maps to a break-even range of **1.09 to 2.87**. For this break-even threshold, observed
+treated volume and contact cost are held fixed; the margin scenarios are deterministic
+stress tests, not forecasts.
 
 [Decision note](reports/decision_note.md) ·
 [Break-even table](reports/economic_break_even.csv)
@@ -110,6 +111,8 @@ Net incremental profit = incremental contribution - campaign cost
 
 Charging campaign cost to all treated activity exposes subsidy leakage: some
 incentives are paid to customers who would have purchased without treatment.
+The profit interval is estimated from customer-level net value, so realized variation
+in order-linked incentive cost is included instead of being treated as fixed.
 
 | Portfolio estimate | Synthetic currency units |
 |---|---:|
@@ -117,7 +120,7 @@ incentives are paid to customers who would have purchased without treatment.
 | Incremental contribution before campaign cost | 30,328 |
 | Campaign cost | 30,587 |
 | Net incremental profit | **-259** |
-| 95% net-profit interval | **-13,226 to 12,709** |
+| 95% net-profit interval | **-12,879 to 12,362** |
 | Incremental ROI | **-0.8%** |
 
 The order effect is statistically positive, but the portfolio profit point estimate
@@ -136,6 +139,16 @@ The auditable results are in
 [campaign economics](reports/campaign_economics.csv) and the short
 [decision note](reports/decision_note.md). The rule and its revision history are in
 the [analysis plan](docs/analysis_plan.md).
+
+## Stability across synthetic samples
+
+The full workflow was repeated for five pre-defined seeds with 60,000 customers each.
+The order effect remained positive in all five runs, but the economic decision changed:
+three runs returned **Redesign** and two returned **Stop**. Positive segment point
+estimates also varied across runs. The committed Seed=42 result is therefore an auditable
+example, not evidence that the same decision is guaranteed in another sample.
+
+[Seed stability table](reports/seed_stability.csv)
 
 ## Pre-specified segment analysis
 
@@ -159,7 +172,7 @@ for different sample sizes, before and after CUPED variance reduction.
 ├── src/marketing_incrementality/  # simulation, diagnostics, estimation, economics
 ├── tests/                         # statistical, financial, and end-to-end tests
 ├── docs/                          # analysis plan, metrics, and interview guide
-├── reports/                       # reproducible aggregate outputs and figures
+├── reports/                       # aggregate outputs, seed stability, and figures
 └── .github/workflows/ci.yml
 ```
 
@@ -168,13 +181,13 @@ for different sample sizes, before and after CUPED variance reduction.
 Python 3.11 or later is required.
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-python -m pip install -e ".[dev]"
-python -m marketing_incrementality.cli run
-python -m ruff check .
-python -m pytest
-python scripts/check_sensitive.py
+uv sync --frozen --all-extras
+uv run --frozen --all-extras python -m marketing_incrementality.cli run
+uv run --frozen --all-extras python -m marketing_incrementality.cli stability
+uv run --frozen --all-extras python -m ruff check .
+uv run --frozen --all-extras python -m pytest --cov=marketing_incrementality --cov-branch
+uv run --frozen --all-extras python -m build --wheel --no-isolation
+uv run --frozen --all-extras python scripts/check_sensitive.py
 ```
 
 The run writes its data and reports under the ignored `local-runs/latest` directory,
@@ -188,6 +201,7 @@ committed.
   between customers.
 - CUPED cannot repair sample ratio mismatch, missing data, or treatment contamination.
 - Segment effects require confirmation in a new pre-registered experiment.
+- The economic recommendation varies across synthetic seeds near the break-even boundary.
 - Production use needs governed exposure logs, delayed-outcome rules, cost
   reconciliation, and monitoring for novelty and spillover effects.
 

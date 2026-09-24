@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import pytest
 
 from marketing_incrementality.estimation import cuped_estimate, holm_adjust
 
@@ -21,3 +22,21 @@ def test_cuped_reduces_standard_error_for_correlated_covariate() -> None:
 def test_holm_adjustment_preserves_order_and_monotonic_control() -> None:
     adjusted = holm_adjust([0.01, 0.04, 0.20])
     assert adjusted == [0.03, 0.08, 0.20]
+
+
+def test_estimator_rejects_missing_or_single_group_data() -> None:
+    missing = pd.DataFrame(
+        {"treatment": [0, 0, 1, 1], "post_orders": [0.0, 1.0, np.nan, 2.0]}
+    )
+    with pytest.raises(ValueError, match="complete"):
+        cuped_estimate(
+            missing.assign(pre_orders=[0.0, 1.0, 0.0, 1.0]),
+            "post_orders",
+            "pre_orders",
+        )
+
+    single_group = pd.DataFrame(
+        {"treatment": [1, 1], "post_orders": [1.0, 2.0], "pre_orders": [0.0, 1.0]}
+    )
+    with pytest.raises(ValueError, match="both treatment groups"):
+        cuped_estimate(single_group, "post_orders", "pre_orders")

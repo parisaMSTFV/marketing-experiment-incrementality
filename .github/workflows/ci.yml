@@ -12,18 +12,29 @@ jobs:
   quality:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
           python-version: "3.12"
-          cache: "pip"
-      - name: Install project
-        run: python -m pip install -e ".[dev]"
+      - name: Install locked environment
+        run: |
+          python -m pip install uv==0.12.17
+          uv sync --frozen --all-extras
       - name: Lint
-        run: python -m ruff check .
-      - name: Test
-        run: python -m pytest
+        run: .venv/bin/python -m ruff check .
+      - name: Build wheel
+        run: .venv/bin/python -m build --wheel --no-isolation
+      - name: Install wheel
+        run: uv pip install --python .venv/bin/python --reinstall --no-deps dist/*.whl
+      - name: Test installed wheel with coverage
+        working-directory: /tmp
+        run: |
+          "$GITHUB_WORKSPACE/.venv/bin/python" -m pytest "$GITHUB_WORKSPACE/tests" \
+            --cov=marketing_incrementality --cov-branch --cov-fail-under=90
       - name: Scan public files
-        run: python scripts/check_sensitive.py
-      - name: Smoke-test pipeline
-        run: make smoke
+        run: .venv/bin/python scripts/check_sensitive.py
+      - name: Smoke-test installed CLI outside source tree
+        working-directory: /tmp
+        run: |
+          "$GITHUB_WORKSPACE/.venv/bin/python" -m marketing_incrementality.cli run \
+            --customers 5000 --seed 7 --project-root /tmp/marketing-incrementality-smoke

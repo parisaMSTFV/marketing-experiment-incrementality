@@ -12,6 +12,17 @@ def sample_ratio_check(
 ) -> dict[str, float | int | bool]:
     """Test whether observed assignment matches the planned allocation."""
 
+    if not 0 < expected_treatment_share < 1:
+        raise ValueError("expected_treatment_share must be between zero and one")
+    if not 0 < alpha < 1:
+        raise ValueError("alpha must be between zero and one")
+    if "treatment" not in frame or frame.empty:
+        raise ValueError("frame must contain at least one treatment assignment")
+    if frame["treatment"].isna().any() or not set(
+        frame["treatment"].unique()
+    ).issubset({0, 1}):
+        raise ValueError("treatment must be complete and contain only zero and one")
+
     counts = frame["treatment"].value_counts().reindex([0, 1], fill_value=0)
     total = int(counts.sum())
     expected = np.array(
